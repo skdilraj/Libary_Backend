@@ -20,7 +20,10 @@ const userSchema = new Schema({
     type: Schema.Types.ObjectId,
     refPath: 'roleProfileRef'
   },
-
+  //
+  refreshToken: {
+    type: String
+  },
   // Dynamic ref path: tells Mongoose which model to use
   roleProfileRef: {
     type: String,
@@ -71,3 +74,4 @@ userSchema.methods.isPasswordCorrect = async function(password){
 }
 
 module.exports = mongoose.model('User', userSchema);
+
