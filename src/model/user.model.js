@@ -18,7 +18,10 @@ const userSchema = new Schema({
     type: Schema.Types.ObjectId,
     refPath: 'roleProfileRef'
   },
-
+  //
+  refreshToken: {
+    type: String
+  },
   // Dynamic ref path: tells Mongoose which model to use
   roleProfileRef: {
     type: String,
@@ -27,4 +30,7 @@ const userSchema = new Schema({
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model('User', userSchema);
+
+let users = mongoose.model('User', userSchema);
+
+export default users;
