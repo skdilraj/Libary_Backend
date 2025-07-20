@@ -14,7 +14,7 @@ export const registerStudent = async (req, res) => {
       return res.status(409).json({ message: "Email already exists" });
     }
 
-    // 1. Create user
+    // Create user
     const user = await User.create({
       name,
       email,
@@ -23,7 +23,7 @@ export const registerStudent = async (req, res) => {
       roleProfileRef: "StudentProfile",
     });
 
-    // 2. Create student profile and link user
+    // Create student profile and link user
     const studentProfile = await StudentProfile.create({
       user: user._id,
       rollNumber,
@@ -31,21 +31,13 @@ export const registerStudent = async (req, res) => {
       year,
     });
 
-    // 3. Link profile back to user
+    // Link profile back to user
     user.profileRef = studentProfile._id;
     await user.save();
-
-    // Optionally generate tokens here
-    // const accessToken = user.generateAccessToken();
-    // const refreshToken = user.generateRefreshToken();
-    // user.refreshToken = refreshToken;
-    // await user.save();
 
     res.status(201).json({
       message: "Student registered successfully",
       userId: user._id,
-      // accessToken,
-      // refreshToken
     });
   } catch (error) {
     console.error("Register error:", error);
@@ -55,7 +47,6 @@ export const registerStudent = async (req, res) => {
     });
   }
 };
-
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -63,34 +54,36 @@ export const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user || !(await user.isPasswordCorrect(password))) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid credentials" });
+      return res.status(401).json({ success: false, message: "Invalid email or password" });
     }
 
-    const accessToken = user.generateAccessToken();
-    const refreshToken = user.generateRefreshToken();
-
-    user.refreshToken = refreshToken;
-    await user.save();
+    // Save user info to session
+    req.session.user = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      profileRef: user.profileRef
+    };
 
     res.status(200).json({
       success: true,
       message: "Login successful",
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        profileRef: user.profileRef,
-      },
-      accessToken,
-      refreshToken,
+      user: req.session.user
     });
   } catch (err) {
     console.error("Login error:", err);
-    res
-      .status(500)
-      .json({ success: false, message: "Login failed", error: err.message });
+    res.status(500).json({ success: false, message: "Login failed", error: err.message });
   }
+};
+
+
+export const logoutUser = (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ message: "Logout failed", error: err.message });
+    }
+    res.clearCookie("connect.sid"); // clear session cookie
+    res.json({ message: "Logged out successfully" });
+  });
 };
