@@ -1,58 +1,39 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import users from "./model/user.model.js";
+import dotenv from "dotenv";
+import user from "./model/user.model.js";
+import authRoutes from "./routes/auth.js";
+import connectDB from './db/db.js';
+dotenv.config(); // Load .env
 
 const app = express();
+
+connectDB().then(()=>{
+    app.listen(PORT,()=>{
+    console.log("app is listening to port ",PORT);
+    })
+}).catch((err)=>{
+    console.log("Mongo Db failed connection ",err)
+})
 
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN,
-    // credentials:true
+    // credentials: true
   })
 );
 
 app.use(express.json({ limit: "20kb" }));
-// Parses incoming JSON requests and limits the body size to 20kb
-
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
-// Parses incoming URL-encoded data (from forms), with nested object support and 16kb limit
-
 app.use(express.static("public"));
-// Serves static files (e.g., images, CSS, JS) from the "public" directory
-
 app.use(cookieParser());
-// Parses cookies attached to the client request (req.cookies)
 
-//login page
-app.post("/login", express.json(), async (req, res) => {
-  try {
-    // console.log(req.body);
-    if (!req.body.email || !req.body.password) {
-      return res
-        .status(400)
-        .json({ message: "Email and password are required" });
-    }
+// Login test route
+app.use("/api/auth", authRoutes);
 
-    let data = await users.findOne({ email: req.body.email }).select("email password -_id");
-
-    if (data) {
-      if (req.body.password === data.password) {
-        res.status(200).json({ message: "Login Successfull" });
-      } else {
-        res.status(400).json({ message: "Wrong Credentials" });
-        return;
-      }
-    }
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Server Error" });
-  }
+//  Add this to start the server
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
-
-// testing data insert
-// app.get("/",async (req , res) =>{
-//     let data = await users.create({name:"shubh",email:"samrat@gmail.com",password:"hello",role:"student",roleProfileRef:"StudentProfile"});
-//     res.send(data);
-// });
-export default app;

@@ -17,4 +17,4 @@ const librarianSchema = new Schema({
         required: true
     }
 });
-module.exports = mongoose.model('LibrarianProfile', librarianSchema);
+export default module.exports = mongoose.model('LibrarianProfile', librarianSchema);

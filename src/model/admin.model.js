@@ -16,4 +16,4 @@ const adminProfileSchema = new Schema({
     }
 }, { timestamps: true });
 
-module.exports = mongoose.model('AdminProfile', adminProfileSchema);
+export default module.exports = mongoose.model('AdminProfile', adminProfileSchema);
