@@ -68,6 +68,7 @@ const PORT = process.env.PORT || 8000;
 connectDB().then(() => {
   app.listen(PORT, () => {
     console.log(`✅ Server running at http://localhost:${PORT}`);
+    console.log(process.env.CLOUDINARY_API_KEY)
   });
 }).catch((err) => {
   console.error(" Failed to connect DB:", err);

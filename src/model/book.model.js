@@ -1,4 +1,3 @@
-// models/Book.js
 import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
@@ -39,4 +38,5 @@ const bookSchema = new Schema({
   }
 }, { timestamps: true });
 
-export default module.exports = mongoose.model('Book', bookSchema);
+// This is the corrected line. We use the standard ES Module 'export default'.
+export default mongoose.model('Book', bookSchema);
