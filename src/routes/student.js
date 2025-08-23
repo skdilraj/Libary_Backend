@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticateUser, authorizeRoles } from "../middlewares/authenticateUser.js";
-import { getStudentProfile } from "../controllers/studentController.js";
+import { getStudentProfile, getBooksByCategory, requestBook } from "../controllers/studentController.js";
 const router = express.Router();
 
 // Session-based authentication & role check
@@ -13,6 +13,10 @@ router.get("/borrowed-books", authenticateUser, authorizeRoles("student"), (req,
 });
 // profile details
 router.get("/profile", getStudentProfile );
+
+router.get("/books", getBooksByCategory);
+
+router.post("/issue-request", authenticateUser,authorizeRoles("student"), requestBook);
 
 export default router;
 

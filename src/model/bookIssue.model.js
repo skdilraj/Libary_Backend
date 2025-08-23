@@ -24,7 +24,7 @@ const bookIssueSchema = new Schema({
     issuedBy: {
         type: Schema.Types.ObjectId,
         ref: 'User', // referencing user with role: 'librarian'
-        required: true
+        required: false,
     },
     issueDate: {
         type: Date,
@@ -37,4 +37,4 @@ const bookIssueSchema = new Schema({
     },
 });
 
-export default module.exports = mongoose.model('BookIssue', bookIssueSchema);
+export default mongoose.model("BookIssue", bookIssueSchema);
