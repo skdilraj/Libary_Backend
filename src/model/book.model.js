@@ -5,7 +5,7 @@ const bookSchema = new Schema({
   title: {
     type: String,
     required: true,
-    index:true,
+    index: true,
     trim: true
   },
   author: {
@@ -19,6 +19,41 @@ const bookSchema = new Schema({
     unique: true,
     trim: true
   },
+  publisherName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  resourceType: {
+    type: String,
+    required: true,
+    enum: [
+      "Book",
+      "E-Book",
+      "Journal",
+      "Magazine",
+      "Newspaper",
+      "Thesis",
+      "Reference",
+      "Audio-Visual"
+    ]
+  },
+  category: {
+    type: String,
+    required: true,
+    enum: [
+      "Science",
+      "Technology",
+      "Arts",
+      "Literature",
+      "History",
+      "Geography",
+      "Philosophy",
+      "Religion",
+      "Social Science",
+      "Language"
+    ]
+  },
   totalCopies: {
     type: Number,
     required: true
@@ -28,8 +63,8 @@ const bookSchema = new Schema({
     required: true
   },
   bookImage: {
-    type: String, // Stores the Cloudinary URL
-    default: ''   // optional
+    type: String,
+    default: ''
   },
   addedBy: {
     type: Schema.Types.ObjectId,
@@ -38,5 +73,4 @@ const bookSchema = new Schema({
   }
 }, { timestamps: true });
 
-// This is the corrected line. We use the standard ES Module 'export default'.
 export default mongoose.model('Book', bookSchema);

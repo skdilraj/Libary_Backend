@@ -37,7 +37,7 @@ app.use(
     }),
     cookie: {
       httpOnly: true,
-      maxAge: 1000 * 60 * 15, // 15 minutes
+      maxAge: 1000 * 60 * 30, // 15 minutes
       sameSite: "lax", // for CSRF protection
       secure: process.env.NODE_ENV === "production", // only send over HTTPS in production
     }
