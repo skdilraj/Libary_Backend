@@ -11,6 +11,8 @@ import adminRoutes from "./routes/admin.js";
 import librarianRoutes from "./routes/librarian.js";
 import studentRoutes from "./routes/student.js";
 import connectDB from './db/db.js';
+import { startCronJobs } from "./cornJob/fineCornJob.js";
+import { sendEmail } from "./utils/email.js";
 
 dotenv.config();
 
@@ -60,15 +62,15 @@ app.use("/api/admin", adminRoutes);       // admin protected
 app.use("/api/librarian", librarianRoutes);
 app.use("/api/student", studentRoutes);
 
-
-
 // Start the server
 const PORT = process.env.PORT || 8000;
 
 connectDB().then(() => {
+  startCronJobs();
   app.listen(PORT, () => {
     console.log(`✅ Server running at http://localhost:${PORT}`);
     console.log(process.env.CLOUDINARY_API_KEY)
+    
   });
 }).catch((err) => {
   console.error(" Failed to connect DB:", err);

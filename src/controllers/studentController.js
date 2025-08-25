@@ -1,5 +1,6 @@
 import StudentProfile from "../model/student.model.js";
 import Book from "../model/book.model.js";
+import User from "../model/user.model.js";
 import BookIssue from "../model/bookIssue.model.js";
 
 // Fetch logged-in student's profile (name, email, rollNumber)
@@ -63,7 +64,6 @@ export const getBooksByCategory = async (req, res) => {
 };
 
 
-
 export const requestBook = async (req, res) => {
   try {
     if (!req.user) {
@@ -74,7 +74,7 @@ export const requestBook = async (req, res) => {
     const studentId = req.user._id;
 
     // Check if book exists
-    const book = await Book.findById(bookId);
+    const book = await Book.findById(bookId); // don't use .lean() if we might update it later
     if (!book) return res.status(404).json({ message: "Book not found" });
 
     // Check availability
@@ -82,17 +82,29 @@ export const requestBook = async (req, res) => {
       return res.status(400).json({ message: "No copies available" });
     }
 
-    // 🔹 Prevent duplicate borrow requests
+    // Check how many active (pending/approved) requests this student already has
+    const activeRequests = await BookIssue.countDocuments({
+      student: studentId,
+      status: { $in: ["pending", "approved"] },
+    });
+
+    if (activeRequests >= 3) {
+      return res.status(400).json({
+        message: "Limit reached: You can only request/borrow up to 3 books at a time",
+      });
+    }
+
+    // Prevent duplicate borrow requests for the same book
     const existingRequest = await BookIssue.findOne({
       book: bookId,
       student: studentId,
-      status: { $in: ["pending", "approved"] } // pending or already approved
-    });
+      status: { $in: ["pending", "approved"] },
+    }).lean(); // use lean here for performance
 
     if (existingRequest) {
-      return res
-        .status(400)
-        .json({ message: "You already requested or borrowed this book" });
+      return res.status(400).json({
+        message: "You already requested or borrowed this book",
+      });
     }
 
     // Create borrow request
@@ -106,9 +118,32 @@ export const requestBook = async (req, res) => {
 
     await newIssue.save();
 
-    res.status(201).json({ message: "Borrow request submitted", issue: newIssue });
+    res
+      .status(201)
+      .json({ message: "Borrow request submitted", issue: newIssue });
   } catch (err) {
     console.error("Error requesting book:", err);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get borrows of a specific student by ID (for admin/librarian)
+
+export const getMyBorrows = async (req, res) => {
+  try {
+    const userId =  req.user._id; // session set during login
+    if (!userId) return res.status(401).json({ error: "Not logged in" });
+
+    // 1. Fetch user
+    const user = await User.findById(userId);
+    if (!user || user.role !== "student") {
+      return res.status(403).json({ error: "Not a student" });
+    }
+    const issues = await BookIssue.find({ student: userId })
+      .populate("book", "title author bookImage category publisherName isbn");
+
+    res.json({ success: true, data: issues });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };

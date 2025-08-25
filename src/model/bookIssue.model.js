@@ -35,6 +35,7 @@ const bookIssueSchema = new Schema({
     returnDate: {
         type: Date
     },
+    fine: { type: Number, default: 0 },
 });
 
 export default mongoose.model("BookIssue", bookIssueSchema);
